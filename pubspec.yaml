@@ -1,0 +1,43 @@
+name: alumbus
+description: "A new Flutter project. Created by Irfan Ahmad Alvi"
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Core Packages - Only one entry for cupertino_icons
+  cupertino_icons: ^1.0.8
+
+  # Firebase
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.5
+  firebase_storage: ^11.7.7
+  firebase_messaging: ^14.9.4
+
+  # State Management
+  flutter_bloc: ^8.1.6
+
+  # Navigation
+  go_router: ^14.2.0
+
+  # Networking & Utility
+  cached_network_image: ^3.3.1
+  url_launcher: ^6.3.2
+  image_picker: ^1.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
