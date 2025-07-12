@@ -17,13 +17,7 @@ class DefaultFirebaseOptions {
           projectId: 'alumbus-3b85b', // Your project ID
           storageBucket: 'alumbus-3b85b.appspot.com',
         );
-      case TargetPlatform.iOS:
-      // Your file has settings for iOS here
-        return const FirebaseOptions(
-          apiKey: 'AIzaSy*****************YOUR_KEY', // Your file has a real key
-          appId: '1:1234567890:ios:abcde12345', messagingSenderId: '', projectId: '', // Your file has a real ID
-          // ...and so on
-        );
+
       default:
         throw UnsupportedError(
           'DefaultFirebaseOptions are not supported for this platform.',

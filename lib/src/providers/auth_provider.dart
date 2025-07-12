@@ -18,12 +18,22 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = message;
   }
 
-  Future<bool> signUp({required String email, required String password}) async {
+  // THIS METHOD IS NOW UPDATED
+  Future<bool> signUp({
+    required String email,
+    required String password,
+    required String fullName, // The required fullName parameter is now added
+  }) async {
     _setLoading(true);
     _setErrorMessage(null);
 
     try {
-      await _authService.signUpWithEmail(email: email, password: password);
+      // The fullName is now correctly passed to the auth service
+      await _authService.signUpWithEmail(
+        email: email,
+        password: password,
+        fullName: fullName,
+      );
       _setLoading(false);
       return true;
     } catch (e) {
@@ -46,5 +56,9 @@ class AuthProvider with ChangeNotifier {
       _setLoading(false);
       return false;
     }
+  }
+
+  Future<void> signOut() async {
+    await _authService.signOut();
   }
 }
