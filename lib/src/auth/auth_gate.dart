@@ -5,7 +5,7 @@ import 'package:alumbus/src/auth/login_screen.dart';
 import 'package:alumbus/src/screens/directory_screen.dart';
 
 class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
+   AuthGate({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,17 +14,17 @@ class AuthGate extends StatelessWidget {
       stream: AuthService().authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return  Center(child: CircularProgressIndicator());
         }
 
         // User is not logged in
         if (!snapshot.hasData) {
           // FIX 2: This now correctly refers to the real LoginScreen.
-          return const LoginScreen();
+          return LoginScreen();
         }
 
         // User is logged in
-        return const DirectoryScreen();
+        return DirectoryScreen();
       },
     );
   }

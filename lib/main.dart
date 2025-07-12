@@ -4,15 +4,23 @@ import 'firebase_options.dart';
 import 'package:alumbus/src/app.dart';
 
 Future<void> main() async {
-  // This line ensures Flutter is ready.
+  // Ensure Flutter is properly initialized before Firebase
   WidgetsFlutterBinding.ensureInitialized();
 
-  // THIS "if" STATEMENT IS THE FIX.
-  // It checks if Firebase is already initialized before trying again.
-  if (Firebase.apps.isEmpty) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  try {
+    // Initialize Firebase only if it hasn't been already
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (e) {
+    // Handle hot restart or duplicate init safely
+    if (e.toString().contains('duplicate-app')) {
+      debugPrint('⚠️ Firebase already initialized. Ignoring duplicate-app error.');
+    } else {
+      rethrow; // Any other error should still crash
+    }
   }
 
   runApp(const App());

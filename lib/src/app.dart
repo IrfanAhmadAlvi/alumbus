@@ -23,7 +23,7 @@ class App extends StatelessWidget {
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: const AuthGate(),
+        home: AuthGate(),
       ),
     );
   }
