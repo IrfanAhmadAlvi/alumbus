@@ -6,14 +6,24 @@ import '../models/user_model.dart';
 class DirectoryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // THIS IS THE NEW, FASTER METHOD
+  // This is the new method to update a user's profile data
+  Future<void> updateAlumProfile(String userId, Map<String, dynamic> data) async {
+    try {
+      await _firestore.collection('alumniProfiles').doc(userId).update(data);
+    } catch (e) {
+      print("Error updating alum profile: $e");
+      rethrow;
+    }
+  }
+
   Future<Alum?> getAlumById(String userId) async {
     try {
       final doc = await _firestore.collection('alumniProfiles').doc(userId).get();
       if (doc.exists) {
+        print('Raw Firestore Data: ${doc.data()}');
         return Alum.fromFirestore(doc);
       }
-      return null; // Return null if the profile doesn't exist
+      return null;
     } catch (e) {
       print("Error fetching alum by ID: $e");
       rethrow;

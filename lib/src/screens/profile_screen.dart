@@ -1,4 +1,6 @@
+import 'package:alumbus/src/auth/auth_service.dart';
 import 'package:alumbus/src/models/user_model.dart';
+import 'package:alumbus/src/screens/edit_profile_screen.dart';
 import 'package:alumbus/src/widgets/profile_info_card.dart';
 import 'package:flutter/material.dart';
 
@@ -8,15 +10,25 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. UPDATE THE LENGTH FROM 6 TO 4
+    // Check if the profile being viewed belongs to the currently logged-in user
+    final isCurrentUser = AuthService().currentUser?.uid == alum.id;
+
     return DefaultTabController(
       length: 4,
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
-        floatingActionButton: FloatingActionButton(
-          onPressed: () { /* TODO: Navigate to Edit Profile Screen */ },
+        // Only show the edit button if it's the current user's profile
+        floatingActionButton: isCurrentUser
+            ? FloatingActionButton(
+          onPressed: () {
+            // Navigate to the EditProfileScreen when the button is tapped
+            Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => EditProfileScreen(alum: alum),
+            ));
+          },
           child: const Icon(Icons.edit),
-        ),
+        )
+            : null,
         body: SafeArea(
           child: NestedScrollView(
             headerSliverBuilder: (context, innerBoxIsScrolled) {
@@ -38,17 +50,30 @@ class ProfileScreen extends StatelessWidget {
                         const SizedBox(height: 50),
                         CircleAvatar(
                           radius: 45,
-                          backgroundImage: NetworkImage(alum.profilePictureUrl),
+                          backgroundColor: Colors.grey.shade300,
+                          // This safely handles cases where the profile picture URL is empty
+                          backgroundImage: alum.profilePictureUrl.isNotEmpty
+                              ? NetworkImage(alum.profilePictureUrl)
+                              : null,
+                          child: alum.profilePictureUrl.isEmpty
+                              ? Icon(Icons.person,
+                              size: 45, color: Colors.grey.shade600)
+                              : null,
                         ),
                         const SizedBox(height: 12),
                         Text(
                           alum.fullName,
-                          style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(alum.batch, style: const TextStyle(fontSize: 16)),
-                        Text(alum.profession, style: const TextStyle(fontSize: 16, color: Colors.black54)),
-                        Text(alum.location, style: const TextStyle(fontSize: 16, color: Colors.black54)),
+                        Text(alum.profession,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.black54)),
+                        Text(alum.location,
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.black54)),
                       ],
                     ),
                   ),
@@ -59,7 +84,6 @@ class ProfileScreen extends StatelessWidget {
                     labelColor: Theme.of(context).primaryColor,
                     unselectedLabelColor: Colors.black54,
                     indicatorColor: Theme.of(context).primaryColor,
-                    // 2. REMOVE THE "Workcred" and "Tags" TABS
                     tabs: const [
                       Tab(text: "Contact"),
                       Tab(text: "About Me"),
@@ -71,9 +95,7 @@ class ProfileScreen extends StatelessWidget {
               ];
             },
             body: TabBarView(
-              // 3. REMOVE THE LAST TWO PLACEHOLDERS
               children: [
-                // Content for the "Contact" tab
                 ListView(
                   padding: const EdgeInsets.only(top: 8, bottom: 80),
                   children: [
@@ -115,7 +137,6 @@ class ProfileScreen extends StatelessWidget {
                       ),
                   ],
                 ),
-                // Placeholder content for other tabs
                 const Center(child: Text("About Me details here")),
                 const Center(child: Text("Media content here")),
                 const Center(child: Text("Social links here")),
