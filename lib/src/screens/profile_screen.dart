@@ -10,18 +10,15 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Check if the profile being viewed belongs to the currently logged-in user
     final isCurrentUser = AuthService().currentUser?.uid == alum.id;
 
     return DefaultTabController(
       length: 4,
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
-        // Only show the edit button if it's the current user's profile
         floatingActionButton: isCurrentUser
             ? FloatingActionButton(
           onPressed: () {
-            // Navigate to the EditProfileScreen when the button is tapped
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => EditProfileScreen(alum: alum),
             ));
@@ -51,7 +48,6 @@ class ProfileScreen extends StatelessWidget {
                         CircleAvatar(
                           radius: 45,
                           backgroundColor: Colors.grey.shade300,
-                          // This safely handles cases where the profile picture URL is empty
                           backgroundImage: alum.profilePictureUrl.isNotEmpty
                               ? NetworkImage(alum.profilePictureUrl)
                               : null,
@@ -67,17 +63,14 @@ class ProfileScreen extends StatelessWidget {
                               fontSize: 22, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
-                        Text(alum.batch, style: const TextStyle(fontSize: 16)),
+                        // ONLY PROFESSION IS SHOWN HERE NOW
                         Text(alum.profession,
-                            style: const TextStyle(
-                                fontSize: 16, color: Colors.black54)),
-                        Text(alum.location,
                             style: const TextStyle(
                                 fontSize: 16, color: Colors.black54)),
                       ],
                     ),
                   ),
-                  expandedHeight: 320,
+                  expandedHeight: 280, // Adjusted height
                   pinned: true,
                   bottom: TabBar(
                     isScrollable: true,
@@ -96,9 +89,17 @@ class ProfileScreen extends StatelessWidget {
             },
             body: TabBarView(
               children: [
+                // "Contact" Tab Content
                 ListView(
                   padding: const EdgeInsets.only(top: 8, bottom: 80),
                   children: [
+                    // BATCH IS NOW HERE
+                    if (alum.batch.isNotEmpty)
+                      ProfileInfoCard(
+                        icon: Icons.school_outlined,
+                        label: "Batch",
+                        value: alum.batch,
+                      ),
                     if (alum.primaryPhone.isNotEmpty)
                       ProfileInfoCard(
                         icon: Icons.phone_outlined,
@@ -111,17 +112,23 @@ class ProfileScreen extends StatelessWidget {
                         label: "Primary Email",
                         value: alum.primaryEmail,
                       ),
+                    if (alum.location.isNotEmpty)
+                      ProfileInfoCard(
+                        icon: Icons.location_on_outlined,
+                        label: "Location",
+                        value: alum.location,
+                      ),
                     if (alum.dateOfBirth.isNotEmpty)
                       ProfileInfoCard(
                         icon: Icons.people_alt_outlined,
                         label: "Date Of Birth",
                         value: alum.dateOfBirth,
                       ),
-                    if (alum.petName.isNotEmpty)
+                    if (alum.bloodGroup.isNotEmpty)
                       ProfileInfoCard(
-                        icon: Icons.pets_outlined,
-                        label: "Pet Name",
-                        value: alum.petName,
+                        icon: Icons.bloodtype_outlined,
+                        label: "Blood Group",
+                        value: alum.bloodGroup,
                       ),
                     if (alum.secondaryPhone.isNotEmpty)
                       ProfileInfoCard(
@@ -137,6 +144,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                   ],
                 ),
+                // Placeholder content for other tabs
                 const Center(child: Text("About Me details here")),
                 const Center(child: Text("Media content here")),
                 const Center(child: Text("Social links here")),

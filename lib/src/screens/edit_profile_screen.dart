@@ -13,9 +13,8 @@ class EditProfileScreen extends StatefulWidget {
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  bool _isSaving = false; // Add a state variable for loading
+  bool _isSaving = false;
 
-  // Create controllers for each text field
   late TextEditingController _fullNameController;
   late TextEditingController _batchController;
   late TextEditingController _professionController;
@@ -23,12 +22,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _locationController;
   late TextEditingController _primaryPhoneController;
   late TextEditingController _dateOfBirthController;
-  late TextEditingController _petNameController;
+  late TextEditingController _bloodGroupController; // REPLACED petName
 
   @override
   void initState() {
     super.initState();
-    // Initialize controllers with the existing user data
     _fullNameController = TextEditingController(text: widget.alum.fullName);
     _batchController = TextEditingController(text: widget.alum.batch);
     _professionController = TextEditingController(text: widget.alum.profession);
@@ -36,12 +34,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _locationController = TextEditingController(text: widget.alum.location);
     _primaryPhoneController = TextEditingController(text: widget.alum.primaryPhone);
     _dateOfBirthController = TextEditingController(text: widget.alum.dateOfBirth);
-    _petNameController = TextEditingController(text: widget.alum.petName);
+    _bloodGroupController = TextEditingController(text: widget.alum.bloodGroup); // REPLACED petName
   }
 
   @override
   void dispose() {
-    // Dispose controllers to free up resources
     _fullNameController.dispose();
     _batchController.dispose();
     _professionController.dispose();
@@ -49,18 +46,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _locationController.dispose();
     _primaryPhoneController.dispose();
     _dateOfBirthController.dispose();
-    _petNameController.dispose();
+    _bloodGroupController.dispose(); // REPLACED petName
     super.dispose();
   }
 
-  // This method now handles saving the data to Firestore
   void _handleSaveChanges() async {
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isSaving = true; // Start loading
-      });
+      setState(() { _isSaving = true; });
 
-      // Create a map of the updated data from the controllers
       final Map<String, dynamic> updatedData = {
         'fullName': _fullNameController.text,
         'batch': _batchController.text,
@@ -69,27 +62,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'location': _locationController.text,
         'primaryPhone': _primaryPhoneController.text,
         'dateOfBirth': _dateOfBirthController.text,
-        'petName': _petNameController.text,
+        'bloodGroup': _bloodGroupController.text, // REPLACED petName
       };
 
       try {
-        // Call the service method to update the data in Firestore
         await DirectoryService().updateAlumProfile(widget.alum.id, updatedData);
-
-        setState(() {
-          _isSaving = false; // Stop loading
-        });
-
+        setState(() { _isSaving = false; });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Profile updated successfully!")),
           );
-          Navigator.of(context).pop(); // Go back to the profile screen
+          Navigator.of(context).pop();
         }
       } catch (e) {
-        setState(() {
-          _isSaving = false; // Stop loading
-        });
+        setState(() { _isSaving = false; });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Failed to update profile: $e")),
@@ -105,7 +91,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       appBar: AppBar(
         title: const Text("Edit Profile"),
         actions: [
-          // Show a progress indicator while saving
           if (_isSaving)
             const Padding(
               padding: EdgeInsets.all(16.0),
@@ -130,47 +115,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             key: _formKey,
             child: Column(
               children: [
-                _buildTextField(
-                  controller: _fullNameController,
-                  label: "Full Name",
-                  icon: Icons.person_outline,
-                ),
-                _buildTextField(
-                  controller: _batchController,
-                  label: "Batch (e.g., 1995)",
-                  icon: Icons.school_outlined,
-                ),
-                _buildTextField(
-                  controller: _professionController,
-                  label: "Profession",
-                  icon: Icons.work_outline,
-                ),
-                _buildTextField(
-                  controller: _companyController,
-                  label: "Company",
-                  icon: Icons.business_center_outlined,
-                ),
-                _buildTextField(
-                  controller: _locationController,
-                  label: "Location",
-                  icon: Icons.location_on_outlined,
-                ),
-                _buildTextField(
-                  controller: _primaryPhoneController,
-                  label: "Primary Phone",
-                  icon: Icons.phone_outlined,
-                  keyboardType: TextInputType.phone,
-                ),
-                _buildTextField(
-                  controller: _dateOfBirthController,
-                  label: "Date of Birth",
-                  icon: Icons.calendar_today_outlined,
-                ),
-                _buildTextField(
-                  controller: _petNameController,
-                  label: "Pet Name",
-                  icon: Icons.pets_outlined,
-                ),
+                _buildTextField(controller: _fullNameController, label: "Full Name", icon: Icons.person_outline),
+                _buildTextField(controller: _batchController, label: "Batch", icon: Icons.school_outlined),
+                _buildTextField(controller: _professionController, label: "Profession", icon: Icons.work_outline),
+                _buildTextField(controller: _companyController, label: "Company", icon: Icons.business_center_outlined),
+                _buildTextField(controller: _locationController, label: "Location", icon: Icons.location_on_outlined),
+                _buildTextField(controller: _primaryPhoneController, label: "Primary Phone", icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
+                _buildTextField(controller: _dateOfBirthController, label: "Date of Birth", icon: Icons.calendar_today_outlined),
+                _buildTextField(controller: _bloodGroupController, label: "Blood Group", icon: Icons.bloodtype_outlined), // REPLACED petName
               ],
             ),
           ),
@@ -179,7 +131,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  // Helper widget to avoid repetitive code for text fields
   Widget _buildTextField({
     required TextEditingController controller,
     required String label,
@@ -198,7 +149,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         keyboardType: keyboardType,
         validator: (value) {
           if (value == null || value.isEmpty) {
-            // This validation can be customized for optional fields
             return 'This field cannot be empty';
           }
           return null;

@@ -15,7 +15,7 @@ class Alum {
   final String primaryPhone;
   final String primaryEmail;
   final String dateOfBirth;
-  final String petName;
+  final String bloodGroup; // REPLACED petName
   final String secondaryPhone;
   final String secondaryEmail;
 
@@ -30,21 +30,16 @@ class Alum {
     required this.primaryPhone,
     required this.primaryEmail,
     required this.dateOfBirth,
-    required this.petName,
+    required this.bloodGroup, // REPLACED petName
     required this.secondaryPhone,
     required this.secondaryEmail,
   });
 
-  // This factory constructor creates an Alum object from a Firestore document.
-  // It now includes all the fields your profile screen needs.
   factory Alum.fromFirestore(DocumentSnapshot doc) {
-    // Reads the data from the Firestore document
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
     return Alum(
       id: doc.id,
-      // The '??' provides a default value if the field doesn't exist in the database,
-      // which prevents the app from crashing.
       fullName: data['fullName'] ?? 'N/A',
       batch: data['batch'] ?? 'N/A',
       profession: data['profession'] ?? 'N/A',
@@ -54,7 +49,7 @@ class Alum {
       primaryPhone: data['primaryPhone'] ?? '',
       primaryEmail: data['primaryEmail'] ?? '',
       dateOfBirth: data['dateOfBirth'] ?? '',
-      petName: data['petName'] ?? '',
+      bloodGroup: data['bloodGroup'] ?? '', // REPLACED petName
       secondaryPhone: data['secondaryPhone'] ?? '',
       secondaryEmail: data['secondaryEmail'] ?? '',
     );
