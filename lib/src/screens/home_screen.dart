@@ -5,6 +5,7 @@ import 'package:alumbus/src/providers/directory_provider.dart';
 import 'package:alumbus/src/screens/directory_screen.dart';
 import 'package:alumbus/src/screens/event_screen.dart';
 import 'package:alumbus/src/screens/profile_screen.dart';
+import 'package:alumbus/src/services/directory_service.dart';
 import 'package:alumbus/src/widgets/home_menu_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch alumni data when the home screen is first loaded.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<DirectoryProvider>(context, listen: false).fetchAlumni();
     });
@@ -68,13 +68,8 @@ class _HomeScreenState extends State<HomeScreen> {
           HomeMenuCard(
             title: "My Profile",
             icon: Icons.person,
-            onTap: () {
-              // Get the DirectoryProvider to access the list of all users.
-              final directoryProvider = Provider.of<DirectoryProvider>(context, listen: false);
-
-              // Get the current user's unique ID from Firebase Auth.
+            onTap: () async {
               final currentUserId = AuthService().currentUser?.uid;
-
               if (currentUserId == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Could not identify current user.")),
@@ -82,33 +77,32 @@ class _HomeScreenState extends State<HomeScreen> {
                 return;
               }
 
-              // First, check if the data is still loading.
-              if (directoryProvider.isLoading) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Profile data is loading, please wait...")),
-                );
-                return;
-              }
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (context) => const Center(child: CircularProgressIndicator()),
+              );
 
               try {
-                // Find the profile that matches the current user's ID.
-                final Alum currentUserProfile = directoryProvider.alumni.firstWhere(
-                      (alum) => alum.id == currentUserId,
-                );
+                final Alum? currentUserProfile = await DirectoryService().getAlumById(currentUserId);
 
-                // Navigate to the ProfileScreen, correctly passing the profile data.
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ProfileScreen(alum: currentUserProfile),
-                ));
+                Navigator.of(context).pop(); // Hide loading indicator
+
+                if (currentUserProfile != null) {
+                  // THIS IS THE FIX: Changed 'alum' to 'initialAlum'
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ProfileScreen(initialAlum: currentUserProfile),
+                  ));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Your profile could not be found.")),
+                  );
+                }
               } catch (e) {
-                // --- THIS IS THE SELF-HEALING FIX ---
-                // If the user's profile isn't found, it's likely a data sync issue.
-                // Inform the user and trigger a refresh.
+                Navigator.of(context).pop(); // Hide loading indicator
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Refreshing directory. Please try again in a moment.")),
+                  const SnackBar(content: Text("An error occurred. Please try again.")),
                 );
-                // Trigger a new fetch to get the latest data.
-                directoryProvider.fetchAlumni();
               }
             },
           ),

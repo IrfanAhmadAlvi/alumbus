@@ -22,7 +22,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _locationController;
   late TextEditingController _primaryPhoneController;
   late TextEditingController _dateOfBirthController;
-  late TextEditingController _bloodGroupController; // REPLACED petName
+  late TextEditingController _bloodGroupController;
+  late TextEditingController _secondaryPhoneController;
+  late TextEditingController _secondaryEmailController;
+
 
   @override
   void initState() {
@@ -34,7 +37,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _locationController = TextEditingController(text: widget.alum.location);
     _primaryPhoneController = TextEditingController(text: widget.alum.primaryPhone);
     _dateOfBirthController = TextEditingController(text: widget.alum.dateOfBirth);
-    _bloodGroupController = TextEditingController(text: widget.alum.bloodGroup); // REPLACED petName
+    _bloodGroupController = TextEditingController(text: widget.alum.bloodGroup);
+    _secondaryPhoneController = TextEditingController(text: widget.alum.secondaryPhone);
+    _secondaryEmailController = TextEditingController(text: widget.alum.secondaryEmail);
   }
 
   @override
@@ -46,7 +51,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _locationController.dispose();
     _primaryPhoneController.dispose();
     _dateOfBirthController.dispose();
-    _bloodGroupController.dispose(); // REPLACED petName
+    _bloodGroupController.dispose();
+    _secondaryPhoneController.dispose();
+    _secondaryEmailController.dispose();
     super.dispose();
   }
 
@@ -62,7 +69,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'location': _locationController.text,
         'primaryPhone': _primaryPhoneController.text,
         'dateOfBirth': _dateOfBirthController.text,
-        'bloodGroup': _bloodGroupController.text, // REPLACED petName
+        'bloodGroup': _bloodGroupController.text,
+        'secondaryPhone': _secondaryPhoneController.text,
+        'secondaryEmail': _secondaryEmailController.text,
       };
 
       try {
@@ -120,9 +129,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 _buildTextField(controller: _professionController, label: "Profession", icon: Icons.work_outline),
                 _buildTextField(controller: _companyController, label: "Company", icon: Icons.business_center_outlined),
                 _buildTextField(controller: _locationController, label: "Location", icon: Icons.location_on_outlined),
-                _buildTextField(controller: _primaryPhoneController, label: "Primary Phone", icon: Icons.phone_outlined, keyboardType: TextInputType.phone),
+                // --- THIS FIELD IS NOW OPTIONAL ---
+                _buildTextField(controller: _primaryPhoneController, label: "Primary Phone Optional", icon: Icons.phone_outlined, keyboardType: TextInputType.phone, isRequired: false),
                 _buildTextField(controller: _dateOfBirthController, label: "Date of Birth", icon: Icons.calendar_today_outlined),
-                _buildTextField(controller: _bloodGroupController, label: "Blood Group", icon: Icons.bloodtype_outlined), // REPLACED petName
+                _buildTextField(controller: _bloodGroupController, label: "Blood Group", icon: Icons.bloodtype_outlined),
+
+                _buildTextField(controller: _secondaryEmailController, label: "Email", icon: Icons.email_outlined, keyboardType: TextInputType.emailAddress, isRequired: false),
               ],
             ),
           ),
@@ -136,6 +148,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String label,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
+    bool isRequired = true, // Add a parameter to handle optional fields
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -148,7 +161,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         keyboardType: keyboardType,
         validator: (value) {
-          if (value == null || value.isEmpty) {
+          // Only validate if the field is required
+          if (isRequired && (value == null || value.isEmpty)) {
             return 'This field cannot be empty';
           }
           return null;
