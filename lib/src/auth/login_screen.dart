@@ -40,6 +40,63 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _showForgotPasswordDialog() {
+    final resetEmailController = TextEditingController();
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Reset Password"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("Enter your email address to receive a password reset link."),
+              const SizedBox(height: 16),
+              TextField(
+                controller: resetEmailController,
+                decoration: const InputDecoration(labelText: "Email"),
+                keyboardType: TextInputType.emailAddress,
+                autofocus: true,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final email = resetEmailController.text.trim();
+                if (email.isEmpty) return;
+
+                final success = await authProvider.sendPasswordResetEmail(email: email);
+
+                Navigator.of(context).pop();
+
+                if (mounted) {
+                  final message = success
+                      ? "Password reset email sent. Please check your inbox."
+                      : authProvider.errorMessage ?? "An unknown error occurred.";
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(message),
+                      backgroundColor: success ? Colors.green : Colors.redAccent,
+                    ),
+                  );
+                }
+              },
+              child: const Text("Send"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,6 +139,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   obscureText: true,
                 ),
+
+                // --- WIDGETS REORDERED AS REQUESTED ---
+
                 const SizedBox(height: 24),
                 Consumer<AuthProvider>(
                   builder: (context, provider, child) {
@@ -100,7 +160,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     );
                   },
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
+                TextButton(
+                  onPressed: _showForgotPasswordDialog,
+                  child: const Text("Forgot Password?"),
+                ),
+
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).push(

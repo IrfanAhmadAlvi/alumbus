@@ -36,7 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (hour < 17) {
       return 'Good Afternoon';
     }
-    return 'Good Evening';
+    return 'Good Night';
   }
 
   Future<void> _logout(BuildContext context) async {

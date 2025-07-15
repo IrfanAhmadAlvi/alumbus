@@ -27,7 +27,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     alum = widget.initialAlum;
   }
 
-  // --- HELPER METHOD TO LAUNCH URLS ---
   Future<void> _launchUrl(String urlString) async {
     final Uri url = Uri.parse(urlString);
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
@@ -57,7 +56,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final String downloadUrl =
       await imageService.uploadProfilePicture(imageFile, alum.id);
 
-      // Rebuild the Alum object with ALL fields to prevent data loss
       setState(() {
         alum = Alum(
           id: alum.id,
@@ -66,7 +64,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           profession: alum.profession,
           company: alum.company,
           location: alum.location,
-          profilePictureUrl: downloadUrl, // The only updated field
+          profilePictureUrl: downloadUrl,
           primaryPhone: alum.primaryPhone,
           primaryEmail: alum.primaryEmail,
           dateOfBirth: alum.dateOfBirth,
@@ -216,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             body: TabBarView(
               children: [
-                // --- TAB 1: CONTACT INFO ---
+                // TAB 1: CONTACT INFO
                 ListView(
                   padding: const EdgeInsets.only(top: 8, bottom: 80),
                   children: [
@@ -265,7 +263,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
 
-                // --- TAB 2: ABOUT ME ---
+                // TAB 2: ABOUT ME
                 ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
@@ -305,7 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
 
-                // --- TAB 3: SOCIAL MEDIA ---
+                // TAB 3: SOCIAL MEDIA
                 ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
@@ -330,11 +328,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         platform: "LinkedIn",
                         url: alum.linkedinUrl,
                       ),
-                    if (alum.websiteUrl.isNotEmpty) // <-- ADD THIS
-                      _buildSocialLink(
-                          icon: Icons.language, // <-- ADD THIS
-                          platform: "Website", // <-- ADD THIS
-                          url: alum.websiteUrl),
                     if (alum.facebookUrl.isNotEmpty)
                       _buildSocialLink(
                         icon: Icons.facebook,
@@ -359,6 +352,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         platform: "YouTube",
                         url: alum.youtubeUrl,
                       ),
+                    if (alum.websiteUrl.isNotEmpty)
+                      _buildSocialLink(
+                          icon: Icons.language,
+                          platform: "Website",
+                          url: alum.websiteUrl),
                   ],
                 ),
               ],
@@ -369,7 +367,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- HELPER WIDGET FOR BUILDING SOCIAL LINKS ---
+  // --- THIS WIDGET IS NOW UPDATED ---
   Widget _buildSocialLink(
       {required IconData icon, required String platform, required String url}) {
     return Card(
@@ -377,7 +375,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ListTile(
         leading: Icon(icon, color: Colors.indigo),
         title: Text(platform),
-        subtitle: Text(url, maxLines: 1, overflow: TextOverflow.ellipsis),
+        // The subtitle property that showed the URL has been removed.
         trailing: const Icon(Icons.launch),
         onTap: () => _launchUrl(url),
       ),
