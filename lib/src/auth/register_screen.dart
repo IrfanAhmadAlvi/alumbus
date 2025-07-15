@@ -1,3 +1,4 @@
+import 'package:alumbus/src/auth/verify_email_screen.dart'; // <-- Import the verification screen
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alumbus/src/providers/auth_provider.dart';
@@ -43,18 +44,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     if (success && mounted) {
-      // Pop back to the login screen after successful registration
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Registration successful! Please log in."),
-          backgroundColor: Colors.green,
-        ),
+      // --- NAVIGATION CHANGE ---
+      // Navigate to the verification screen instead of back to login
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const VerifyEmailScreen()),
       );
     } else if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.errorMessage ?? "An unknown error occurred."),
+          content:
+          Text(authProvider.errorMessage ?? "An unknown error occurred."),
           backgroundColor: Colors.redAccent,
         ),
       );
@@ -63,12 +62,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The build method with the UI remains unchanged
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // --- HEADER ---
+            // Header
             Container(
               width: double.infinity,
               padding: const EdgeInsets.only(top: 40, bottom: 20),
@@ -80,8 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(40),
-                  )
-              ),
+                  )),
               child: Column(
                 children: [
                   Align(
@@ -109,7 +108,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
             ),
 
-            // --- REGISTRATION FORM ---
+            // Registration Form
             Padding(
               padding: const EdgeInsets.all(24.0),
               child: Form(
@@ -123,7 +122,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _fullNameController,
                       decoration: InputDecoration(
                         hintText: "Full Name",
-                        prefixIcon: const Icon(Icons.person_outline, color: Colors.grey),
+                        prefixIcon:
+                        const Icon(Icons.person_outline, color: Colors.grey),
                         filled: true,
                         fillColor: Colors.grey.shade100,
                         border: OutlineInputBorder(
@@ -145,7 +145,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _emailController,
                       decoration: InputDecoration(
                         hintText: "Email",
-                        prefixIcon: const Icon(Icons.email_outlined, color: Colors.grey),
+                        prefixIcon:
+                        const Icon(Icons.email_outlined, color: Colors.grey),
                         filled: true,
                         fillColor: Colors.grey.shade100,
                         border: OutlineInputBorder(
@@ -155,7 +156,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value == null || !value.contains('@') || !value.contains('.')) {
+                        if (value == null ||
+                            !value.contains('@') ||
+                            !value.contains('.')) {
                           return 'Please enter a valid email';
                         }
                         return null;
@@ -169,10 +172,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
                         hintText: "Password",
-                        prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
+                        prefixIcon:
+                        const Icon(Icons.lock_outline, color: Colors.grey),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             color: Colors.grey,
                           ),
                           onPressed: () {
@@ -203,10 +209,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       obscureText: _obscureConfirmPassword,
                       decoration: InputDecoration(
                         hintText: "Confirm Password",
-                        prefixIcon: const Icon(Icons.lock_person_outlined, color: Colors.grey),
+                        prefixIcon: const Icon(Icons.lock_person_outlined,
+                            color: Colors.grey),
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                            _obscureConfirmPassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             color: Colors.grey,
                           ),
                           onPressed: () {
@@ -235,13 +244,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Consumer<AuthProvider>(
                       builder: (context, provider, child) {
                         if (provider.isLoading) {
-                          return const Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         return Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(30),
                             gradient: LinearGradient(
-                              colors: [Colors.indigo.shade400, Colors.indigo.shade700],
+                              colors: [
+                                Colors.indigo.shade400,
+                                Colors.indigo.shade700
+                              ],
                             ),
                           ),
                           child: ElevatedButton(
@@ -249,12 +262,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: const Text("Sign Up", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: Colors.white  )),
+                            child: const Text("REGISTER",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16)),
                           ),
                         );
                       },

@@ -5,10 +5,13 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final DirectoryService _directoryService = DirectoryService();
 
+  /// A stream that notifies about changes to the user's sign-in state.
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
+  /// Gets the currently signed-in user, if any.
   User? get currentUser => _auth.currentUser;
 
+  /// Signs in a user with their email and password.
   Future<UserCredential?> signInWithEmail({
     required String email,
     required String password,
@@ -21,6 +24,7 @@ class AuthService {
     }
   }
 
+  /// Registers a new user, sends a verification email, and creates their profile.
   Future<UserCredential?> signUpWithEmail({
     required String email,
     required String password,
@@ -33,13 +37,16 @@ class AuthService {
         password: password,
       );
 
-      if (userCredential.user != null) {
-        // Update the user's display name and photo in Firebase Auth
-        await userCredential.user?.updateDisplayName(fullName);
+      final user = userCredential.user;
+      if (user != null) {
+        // Update the user's profile display name in Firebase Auth
+        await user.updateDisplayName(fullName);
 
-        // Create the user's profile document in Firestore
-        await _directoryService.createUserProfile(
-            userCredential.user!, fullName);
+        // Send the verification email
+        await user.sendEmailVerification();
+
+        // Create the corresponding user profile document in Firestore
+        await _directoryService.createUserProfile(user, fullName);
       }
 
       return userCredential;
@@ -48,6 +55,7 @@ class AuthService {
     }
   }
 
+  /// Sends a password reset link to the specified email.
   Future<void> sendPasswordResetEmail({required String email}) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -56,6 +64,7 @@ class AuthService {
     }
   }
 
+  /// Signs out the current user.
   Future<void> signOut() async {
     await _auth.signOut();
   }
