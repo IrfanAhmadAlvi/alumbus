@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:alumbus/src/auth/auth_service.dart';
 import 'package:alumbus/src/models/user_model.dart';
-import 'package:alumbus/src/screens/edit_about_me_screen.dart'; // <-- 1. IMPORT NEW SCREEN
+import 'package:alumbus/src/screens/edit_about_me_screen.dart';
 import 'package:alumbus/src/screens/edit_profile_screen.dart';
+import 'package:alumbus/src/screens/edit_socials_screen.dart';
 import 'package:alumbus/src/services/image_upload_service.dart';
 import 'package:alumbus/src/widgets/profile_info_card.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart'; // <-- THIS IS THE CORRECT IMPORT
 
 class ProfileScreen extends StatefulWidget {
   final Alum initialAlum;
@@ -25,8 +27,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     alum = widget.initialAlum;
   }
 
+  // --- HELPER METHOD TO LAUNCH URLS ---
+  Future<void> _launchUrl(String urlString) async {
+    final Uri url = Uri.parse(urlString);
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not launch $urlString')),
+        );
+      }
+    }
+  }
+
   Future<void> _changeProfilePicture() async {
-    // ... (no changes in this method)
     setState(() {
       _isUploading = true;
     });
@@ -44,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final String downloadUrl =
       await imageService.uploadProfilePicture(imageFile, alum.id);
 
+      // Rebuild the Alum object with ALL fields to prevent data loss
       setState(() {
         alum = Alum(
           id: alum.id,
@@ -52,7 +66,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           profession: alum.profession,
           company: alum.company,
           location: alum.location,
-          profilePictureUrl: downloadUrl,
+          profilePictureUrl: downloadUrl, // The only updated field
           primaryPhone: alum.primaryPhone,
           primaryEmail: alum.primaryEmail,
           dateOfBirth: alum.dateOfBirth,
@@ -60,11 +74,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           secondaryPhone: alum.secondaryPhone,
           secondaryEmail: alum.secondaryEmail,
           aboutMe: alum.aboutMe,
+          linkedinUrl: alum.linkedinUrl,
+          facebookUrl: alum.facebookUrl,
+          instagramUrl: alum.instagramUrl,
+          githubUrl: alum.githubUrl,
+          youtubeUrl: alum.youtubeUrl,
+          websiteUrl: alum.websiteUrl,
         );
         _isUploading = false;
       });
 
-      if(mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Profile picture updated!")),
         );
@@ -91,6 +111,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.grey.shade100,
         floatingActionButton: isCurrentUser
             ? FloatingActionButton(
+          tooltip: "Edit Contact Info",
           onPressed: () {
             Navigator.of(context).push(MaterialPageRoute(
               builder: (context) => EditProfileScreen(alum: alum),
@@ -195,7 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             body: TabBarView(
               children: [
-                // Tab 1: Contact
+                // --- TAB 1: CONTACT INFO ---
                 ListView(
                   padding: const EdgeInsets.only(top: 8, bottom: 80),
                   children: [
@@ -243,57 +264,122 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                   ],
                 ),
-                // --- 2. UPDATE THE "ABOUT ME" TAB ---
+
+                // --- TAB 2: ABOUT ME ---
                 ListView(
                   padding: const EdgeInsets.all(16.0),
                   children: [
-                    if(isCurrentUser)
-                      Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Text(
-                            alum.aboutMe.isNotEmpty
-                                ? alum.aboutMe
-                                : "This user has not provided a bio.",
-                            style: TextStyle(
-                              fontSize: 16,
-                              height: 1.5,
-                              color: Colors.grey.shade800,
-                            ),
+                    if (isCurrentUser)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text("Write or Edit Bio"),
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  EditAboutMeScreen(alum: alum),
+                            ));
+                          },
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    Card(
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          alum.aboutMe.isNotEmpty
+                              ? alum.aboutMe
+                              : "This user has not provided a bio.",
+                          style: TextStyle(
+                            fontSize: 16,
+                            height: 1.5,
+                            color: Colors.grey.shade800,
                           ),
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          TextButton.icon(
-                            label: const Text("Click Here For Write Bio"),
-                            style: TextButton.styleFrom(
-                              // Aligning the text and icon to the left
-                              padding: EdgeInsets.zero,
-                              alignment: Alignment.centerLeft,
-                            ),
-                            onPressed: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context) => EditAboutMeScreen(alum: alum),
-                              ));
-                            },
-                          ),
-                        ],
-                      ),
-                    const SizedBox(height: 8),
-
+                    ),
                   ],
                 ),
-                // Tab 3: Social Media
-                const Center(child: Text("Social links here")),
+
+                // --- TAB 3: SOCIAL MEDIA ---
+                ListView(
+                  padding: const EdgeInsets.all(16.0),
+                  children: [
+                    if (isCurrentUser)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          icon: const Icon(Icons.edit_outlined),
+                          label: const Text("Edit Social Links"),
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  EditSocialsScreen(alum: alum),
+                            ));
+                          },
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    if (alum.linkedinUrl.isNotEmpty)
+                      _buildSocialLink(
+                        icon: Icons.group_work,
+                        platform: "LinkedIn",
+                        url: alum.linkedinUrl,
+                      ),
+                    if (alum.websiteUrl.isNotEmpty) // <-- ADD THIS
+                      _buildSocialLink(
+                          icon: Icons.language, // <-- ADD THIS
+                          platform: "Website", // <-- ADD THIS
+                          url: alum.websiteUrl),
+                    if (alum.facebookUrl.isNotEmpty)
+                      _buildSocialLink(
+                        icon: Icons.facebook,
+                        platform: "Facebook",
+                        url: alum.facebookUrl,
+                      ),
+                    if (alum.instagramUrl.isNotEmpty)
+                      _buildSocialLink(
+                        icon: Icons.photo_camera,
+                        platform: "Instagram",
+                        url: alum.instagramUrl,
+                      ),
+                    if (alum.githubUrl.isNotEmpty)
+                      _buildSocialLink(
+                        icon: Icons.code,
+                        platform: "GitHub",
+                        url: alum.githubUrl,
+                      ),
+                    if (alum.youtubeUrl.isNotEmpty)
+                      _buildSocialLink(
+                        icon: Icons.play_arrow,
+                        platform: "YouTube",
+                        url: alum.youtubeUrl,
+                      ),
+                  ],
+                ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  // --- HELPER WIDGET FOR BUILDING SOCIAL LINKS ---
+  Widget _buildSocialLink(
+      {required IconData icon, required String platform, required String url}) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8.0),
+      child: ListTile(
+        leading: Icon(icon, color: Colors.indigo),
+        title: Text(platform),
+        subtitle: Text(url, maxLines: 1, overflow: TextOverflow.ellipsis),
+        trailing: const Icon(Icons.launch),
+        onTap: () => _launchUrl(url),
       ),
     );
   }

@@ -24,6 +24,7 @@ dependencies:
   cloudinary_public: ^0.23.1
 
 
+
   # State Management
   flutter_bloc: ^8.1.6
 

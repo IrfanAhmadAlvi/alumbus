@@ -20,6 +20,15 @@ class Alum {
   final String secondaryEmail;
   final String aboutMe;
 
+  // --- 1. ADD NEW SOCIAL MEDIA FIELDS ---
+  final String linkedinUrl;
+  final String facebookUrl;
+  final String instagramUrl;
+  final String githubUrl;
+  final String youtubeUrl;
+  final String websiteUrl;
+
+
   Alum({
     required this.id,
     required this.fullName,
@@ -31,10 +40,18 @@ class Alum {
     required this.primaryPhone,
     required this.primaryEmail,
     required this.dateOfBirth,
-    required this.bloodGroup, // REPLACED petName
+    required this.bloodGroup,
     required this.secondaryPhone,
     required this.secondaryEmail,
     required this.aboutMe,
+
+    // --- 2. ADD TO CONSTRUCTOR ---
+    required this.linkedinUrl,
+    required this.facebookUrl,
+    required this.instagramUrl,
+    required this.githubUrl,
+    required this.youtubeUrl,
+    required this.websiteUrl,
   });
 
   factory Alum.fromFirestore(DocumentSnapshot doc) {
@@ -55,6 +72,15 @@ class Alum {
       secondaryPhone: data['secondaryPhone'] ?? '',
       secondaryEmail: data['secondaryEmail'] ?? '',
       aboutMe: data['aboutMe'] ?? '',
+
+
+      // --- 3. ASSIGN FROM FIRESTORE ---
+      linkedinUrl: data['linkedinUrl'] ?? '',
+      facebookUrl: data['facebookUrl'] ?? '',
+      instagramUrl: data['instagramUrl'] ?? '',
+      githubUrl: data['githubUrl'] ?? '',
+      youtubeUrl: data['youtubeUrl'] ?? '',
+      websiteUrl: data['websiteUrl'] ?? '',
     );
   }
 }
