@@ -1,10 +1,9 @@
 // lib/src/auth/auth_service.dart
-import 'package:alumbus/src/services/directory_service.dart'; // Import DirectoryService
+import 'package:alumbus/src/services/directory_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  // Create an instance of DirectoryService to use its methods
   final DirectoryService _directoryService = DirectoryService();
 
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -23,21 +22,26 @@ class AuthService {
     }
   }
 
-  // THIS METHOD IS NOW UPDATED
+  // --- THIS METHOD IS NOW UPDATED ---
   Future<UserCredential?> signUpWithEmail({
     required String email,
     required String password,
-    required String fullName, // 1. ADD the fullName parameter
+    required String fullName,
   }) async {
     try {
-      // 2. First, create the user in Firebase Authentication
+      // First, create the user in Firebase Authentication
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      // 3. If successful, create the user's profile document in Firestore
+      // If the user was created successfully, update their profile
       if (userCredential.user != null) {
+        // --- THIS IS THE FIX ---
+        // Update the user's display name in Firebase Auth
+        await userCredential.user?.updateDisplayName(fullName);
+
+        // Then, create the user's profile document in Firestore as before
         await _directoryService.createUserProfile(userCredential.user!, fullName);
       }
 

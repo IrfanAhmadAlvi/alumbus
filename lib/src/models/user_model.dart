@@ -18,6 +18,7 @@ class Alum {
   final String bloodGroup; // REPLACED petName
   final String secondaryPhone;
   final String secondaryEmail;
+  final String aboutMe;
 
   Alum({
     required this.id,
@@ -33,6 +34,7 @@ class Alum {
     required this.bloodGroup, // REPLACED petName
     required this.secondaryPhone,
     required this.secondaryEmail,
+    required this.aboutMe,
   });
 
   factory Alum.fromFirestore(DocumentSnapshot doc) {
@@ -52,6 +54,7 @@ class Alum {
       bloodGroup: data['bloodGroup'] ?? '', // REPLACED petName
       secondaryPhone: data['secondaryPhone'] ?? '',
       secondaryEmail: data['secondaryEmail'] ?? '',
+      aboutMe: data['aboutMe'] ?? '',
     );
   }
 }

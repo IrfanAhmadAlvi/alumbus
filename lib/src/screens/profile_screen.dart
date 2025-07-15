@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:alumbus/src/auth/auth_service.dart';
 import 'package:alumbus/src/models/user_model.dart';
+import 'package:alumbus/src/screens/edit_about_me_screen.dart'; // <-- 1. IMPORT NEW SCREEN
 import 'package:alumbus/src/screens/edit_profile_screen.dart';
 import 'package:alumbus/src/services/image_upload_service.dart';
 import 'package:alumbus/src/widgets/profile_info_card.dart';
@@ -25,6 +26,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _changeProfilePicture() async {
+    // ... (no changes in this method)
     setState(() {
       _isUploading = true;
     });
@@ -33,11 +35,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final ImageUploadService imageService = ImageUploadService();
       final File? imageFile = await imageService.pickImage();
       if (imageFile == null) {
-        setState(() { _isUploading = false; });
+        setState(() {
+          _isUploading = false;
+        });
         return;
       }
 
-      final String downloadUrl = await imageService.uploadProfilePicture(imageFile, alum.id);
+      final String downloadUrl =
+      await imageService.uploadProfilePicture(imageFile, alum.id);
 
       setState(() {
         alum = Alum(
@@ -54,21 +59,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
           bloodGroup: alum.bloodGroup,
           secondaryPhone: alum.secondaryPhone,
           secondaryEmail: alum.secondaryEmail,
+          aboutMe: alum.aboutMe,
         );
         _isUploading = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Profile picture updated!")),
-      );
-
+      if(mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile picture updated!")),
+        );
+      }
     } catch (e) {
       setState(() {
         _isUploading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to upload image: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to upload image: $e")),
+        );
+      }
     }
   }
 
@@ -77,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final isCurrentUser = AuthService().currentUser?.uid == alum.id;
 
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
         floatingActionButton: isCurrentUser
@@ -95,21 +104,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
-                  // --- STYLE CHANGE ---
-                  // Changed back button to be visible on a dark background
                   leading: const BackButton(color: Colors.white),
-
-                  // --- STYLE CHANGE ---
-                  // Changed background color to a dark blue
                   backgroundColor: Colors.indigo,
                   elevation: 0,
                   flexibleSpace: FlexibleSpaceBar(
                     background: Container(
-                      // --- STYLE CHANGE ---
-                      // Added a gradient for a richer background design
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [Colors.indigo.shade400, Colors.indigo.shade800],
+                          colors: [
+                            Colors.indigo.shade400,
+                            Colors.indigo.shade800
+                          ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
@@ -117,23 +122,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 50),
+                          const SizedBox(height: 35),
                           Stack(
                             children: [
                               CircleAvatar(
-                                radius: 45,
+                                radius: 55,
                                 backgroundColor: Colors.indigo.shade200,
                                 backgroundImage: alum.profilePictureUrl.isNotEmpty
                                     ? NetworkImage(alum.profilePictureUrl)
                                     : null,
                                 child: alum.profilePictureUrl.isEmpty
                                     ? Icon(Icons.person,
-                                    size: 45, color: Colors.indigo.shade700)
+                                    size: 55,
+                                    color: Colors.indigo.shade700)
                                     : null,
                               ),
                               if (_isUploading)
                                 const Positioned.fill(
-                                  child: CircularProgressIndicator(color: Colors.white),
+                                  child: CircularProgressIndicator(
+                                      color: Colors.white),
                                 ),
                               if (isCurrentUser && !_isUploading)
                                 Positioned(
@@ -144,11 +151,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
                                       decoration: const BoxDecoration(
-                                        color: Colors.white, // Changed for contrast
+                                        color: Colors.white,
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(Icons.camera_alt,
-                                          color: Colors.indigo, size: 18), // Changed for contrast
+                                          color: Colors.indigo, size: 18),
                                     ),
                                   ),
                                 ),
@@ -160,36 +167,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             style: const TextStyle(
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
-                                // --- STYLE CHANGE ---
                                 color: Colors.white),
                           ),
-                          //const SizedBox(height: 4),
                           Text(alum.profession,
                               style: const TextStyle(
-                                  fontSize: 16,
-                                  // --- STYLE CHANGE ---
-                                  color: Colors.white70)),
+                                  fontSize: 16, color: Colors.white70)),
                           const SizedBox(height: 20),
-
                         ],
                       ),
                     ),
                   ),
-
                   expandedHeight: 280,
                   pinned: true,
                   bottom: TabBar(
                     isScrollable: true,
-                    // --- STYLE CHANGE ---
-                    // Updated TabBar colors to be visible on the new dark background
                     labelColor: Colors.white,
                     unselectedLabelColor: Colors.white70,
                     indicatorColor: Colors.white,
                     tabs: const [
                       Tab(text: "Contact"),
                       Tab(text: "About Me"),
-                      Tab(text: "Media"),
-                      Tab(text: "Social"),
+                      Tab(text: "Social Media"),
                     ],
                   ),
                 ),
@@ -197,6 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             },
             body: TabBarView(
               children: [
+                // Tab 1: Contact
                 ListView(
                   padding: const EdgeInsets.only(top: 8, bottom: 80),
                   children: [
@@ -244,8 +243,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                   ],
                 ),
-                const Center(child: Text("About Me details here")),
-                const Center(child: Text("Media content here")),
+                // --- 2. UPDATE THE "ABOUT ME" TAB ---
+                ListView(
+                  padding: const EdgeInsets.all(16.0),
+                  children: [
+                    if(isCurrentUser)
+                      Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            alum.aboutMe.isNotEmpty
+                                ? alum.aboutMe
+                                : "This user has not provided a bio.",
+                            style: TextStyle(
+                              fontSize: 16,
+                              height: 1.5,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton.icon(
+                            label: const Text("Click Here For Write Bio"),
+                            style: TextButton.styleFrom(
+                              // Aligning the text and icon to the left
+                              padding: EdgeInsets.zero,
+                              alignment: Alignment.centerLeft,
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context) => EditAboutMeScreen(alum: alum),
+                              ));
+                            },
+                          ),
+                        ],
+                      ),
+                    const SizedBox(height: 8),
+
+                  ],
+                ),
+                // Tab 3: Social Media
                 const Center(child: Text("Social links here")),
               ],
             ),

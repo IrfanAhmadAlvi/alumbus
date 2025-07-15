@@ -6,10 +6,18 @@ import '../models/user_model.dart';
 class DirectoryService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // This is the new method to update a user's profile data
+  // --- THIS METHOD IS NOW UPDATED ---
   Future<void> updateAlumProfile(String userId, Map<String, dynamic> data) async {
     try {
+      // 1. First, update the Firestore document as before.
       await _firestore.collection('alumniProfiles').doc(userId).update(data);
+
+      // 2. --- THIS IS THE FIX ---
+      // If the 'fullName' is part of the updated data, we also update
+      // the displayName on the Firebase Auth user object.
+      if (data.containsKey('fullName')) {
+        await FirebaseAuth.instance.currentUser?.updateDisplayName(data['fullName']);
+      }
     } catch (e) {
       print("Error updating alum profile: $e");
       rethrow;

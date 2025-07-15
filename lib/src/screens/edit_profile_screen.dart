@@ -25,21 +25,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _bloodGroupController;
   late TextEditingController _secondaryPhoneController;
   late TextEditingController _secondaryEmailController;
-
+  // REMOVED: No longer need the _aboutMeController here
 
   @override
   void initState() {
     super.initState();
     _fullNameController = TextEditingController(text: widget.alum.fullName);
     _batchController = TextEditingController(text: widget.alum.batch);
-    _professionController = TextEditingController(text: widget.alum.profession);
+    _professionController =
+        TextEditingController(text: widget.alum.profession);
     _companyController = TextEditingController(text: widget.alum.company);
     _locationController = TextEditingController(text: widget.alum.location);
-    _primaryPhoneController = TextEditingController(text: widget.alum.primaryPhone);
-    _dateOfBirthController = TextEditingController(text: widget.alum.dateOfBirth);
-    _bloodGroupController = TextEditingController(text: widget.alum.bloodGroup);
-    _secondaryPhoneController = TextEditingController(text: widget.alum.secondaryPhone);
-    _secondaryEmailController = TextEditingController(text: widget.alum.secondaryEmail);
+    _primaryPhoneController =
+        TextEditingController(text: widget.alum.primaryPhone);
+    _dateOfBirthController =
+        TextEditingController(text: widget.alum.dateOfBirth);
+    _bloodGroupController =
+        TextEditingController(text: widget.alum.bloodGroup);
+    _secondaryPhoneController =
+        TextEditingController(text: widget.alum.secondaryPhone);
+    _secondaryEmailController =
+        TextEditingController(text: widget.alum.secondaryEmail);
   }
 
   @override
@@ -59,7 +65,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _handleSaveChanges() async {
     if (_formKey.currentState!.validate()) {
-      setState(() { _isSaving = true; });
+      setState(() {
+        _isSaving = true;
+      });
 
       final Map<String, dynamic> updatedData = {
         'fullName': _fullNameController.text,
@@ -72,11 +80,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         'bloodGroup': _bloodGroupController.text,
         'secondaryPhone': _secondaryPhoneController.text,
         'secondaryEmail': _secondaryEmailController.text,
+        // REMOVED: No longer saving 'aboutMe' from this screen
       };
 
       try {
-        await DirectoryService().updateAlumProfile(widget.alum.id, updatedData);
-        setState(() { _isSaving = false; });
+        await DirectoryService()
+            .updateAlumProfile(widget.alum.id, updatedData);
+        setState(() {
+          _isSaving = false;
+        });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Profile updated successfully!")),
@@ -84,7 +96,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           Navigator.of(context).pop();
         }
       } catch (e) {
-        setState(() { _isSaving = false; });
+        setState(() {
+          _isSaving = false;
+        });
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Failed to update profile: $e")),
@@ -124,17 +138,46 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             key: _formKey,
             child: Column(
               children: [
-                _buildTextField(controller: _fullNameController, label: "Full Name", icon: Icons.person_outline),
-                _buildTextField(controller: _batchController, label: "Batch", icon: Icons.school_outlined),
-                _buildTextField(controller: _professionController, label: "Profession", icon: Icons.work_outline),
-                _buildTextField(controller: _companyController, label: "Company", icon: Icons.business_center_outlined),
-                _buildTextField(controller: _locationController, label: "Location", icon: Icons.location_on_outlined),
-                // --- THIS FIELD IS NOW OPTIONAL ---
-                _buildTextField(controller: _primaryPhoneController, label: "Primary Phone Optional", icon: Icons.phone_outlined, keyboardType: TextInputType.phone, isRequired: false),
-                _buildTextField(controller: _dateOfBirthController, label: "Date of Birth", icon: Icons.calendar_today_outlined),
-                _buildTextField(controller: _bloodGroupController, label: "Blood Group", icon: Icons.bloodtype_outlined),
-
-                _buildTextField(controller: _secondaryEmailController, label: "Email", icon: Icons.email_outlined, keyboardType: TextInputType.emailAddress, isRequired: false),
+                _buildTextField(
+                    controller: _fullNameController,
+                    label: "Full Name",
+                    icon: Icons.person_outline),
+                _buildTextField(
+                    controller: _batchController,
+                    label: "Batch",
+                    icon: Icons.school_outlined),
+                _buildTextField(
+                    controller: _professionController,
+                    label: "Profession",
+                    icon: Icons.work_outline),
+                _buildTextField(
+                    controller: _companyController,
+                    label: "Company",
+                    icon: Icons.business_center_outlined),
+                _buildTextField(
+                    controller: _locationController,
+                    label: "Location",
+                    icon: Icons.location_on_outlined),
+                _buildTextField(
+                    controller: _primaryPhoneController,
+                    label: "Primary Phone Optional",
+                    icon: Icons.phone_outlined,
+                    keyboardType: TextInputType.phone,
+                    isRequired: false),
+                _buildTextField(
+                    controller: _dateOfBirthController,
+                    label: "Date of Birth",
+                    icon: Icons.calendar_today_outlined),
+                _buildTextField(
+                    controller: _bloodGroupController,
+                    label: "Blood Group",
+                    icon: Icons.bloodtype_outlined),
+                _buildTextField(
+                    controller: _secondaryEmailController,
+                    label: "Email",
+                    icon: Icons.email_outlined,
+                    keyboardType: TextInputType.emailAddress,
+                    isRequired: false),
               ],
             ),
           ),
@@ -148,7 +191,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     required String label,
     required IconData icon,
     TextInputType keyboardType = TextInputType.text,
-    bool isRequired = true, // Add a parameter to handle optional fields
+    bool isRequired = true,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -161,7 +204,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         keyboardType: keyboardType,
         validator: (value) {
-          // Only validate if the field is required
           if (isRequired && (value == null || value.isEmpty)) {
             return 'This field cannot be empty';
           }
