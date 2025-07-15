@@ -7,7 +7,7 @@ import 'package:alumbus/src/screens/edit_socials_screen.dart';
 import 'package:alumbus/src/services/image_upload_service.dart';
 import 'package:alumbus/src/widgets/profile_info_card.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart'; // <-- THIS IS THE CORRECT IMPORT
+import 'package:url_launcher/url_launcher.dart';
 
 class ProfileScreen extends StatefulWidget {
   final Alum initialAlum;
