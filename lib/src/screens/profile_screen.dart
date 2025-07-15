@@ -95,69 +95,84 @@ class _ProfileScreenState extends State<ProfileScreen> {
             headerSliverBuilder: (context, innerBoxIsScrolled) {
               return [
                 SliverAppBar(
-                  leading: const BackButton(color: Colors.black),
-                 /* actions: [
-                    IconButton(
-                      icon: const Icon(Icons.more_vert, color: Colors.black),
-                      onPressed: () {},
-                    ),
-                  ],*/
-                  backgroundColor: Colors.grey.shade100,
+                  // --- STYLE CHANGE ---
+                  // Changed back button to be visible on a dark background
+                  leading: const BackButton(color: Colors.white),
+
+                  // --- STYLE CHANGE ---
+                  // Changed background color to a dark blue
+                  backgroundColor: Colors.indigo,
                   elevation: 0,
                   flexibleSpace: FlexibleSpaceBar(
-                    background: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const SizedBox(height: 50),
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: 45,
-                              backgroundColor: Colors.grey.shade300,
-                              backgroundImage: alum.profilePictureUrl.isNotEmpty
-                                  ? NetworkImage(alum.profilePictureUrl)
-                                  : null,
-                              child: alum.profilePictureUrl.isEmpty
-                                  ? Icon(Icons.person,
-                                  size: 45, color: Colors.grey.shade600)
-                                  : null,
-                            ),
-                            if (_isUploading)
-                              const Positioned.fill(
-                                child: CircularProgressIndicator(),
+                    background: Container(
+                      // --- STYLE CHANGE ---
+                      // Added a gradient for a richer background design
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Colors.indigo.shade400, Colors.indigo.shade800],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 50),
+                          Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 45,
+                                backgroundColor: Colors.indigo.shade200,
+                                backgroundImage: alum.profilePictureUrl.isNotEmpty
+                                    ? NetworkImage(alum.profilePictureUrl)
+                                    : null,
+                                child: alum.profilePictureUrl.isEmpty
+                                    ? Icon(Icons.person,
+                                    size: 45, color: Colors.indigo.shade700)
+                                    : null,
                               ),
-                            if (isCurrentUser && !_isUploading)
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: GestureDetector(
-                                  onTap: _changeProfilePicture,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).primaryColor,
-                                      shape: BoxShape.circle,
+                              if (_isUploading)
+                                const Positioned.fill(
+                                  child: CircularProgressIndicator(color: Colors.white),
+                                ),
+                              if (isCurrentUser && !_isUploading)
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: _changeProfilePicture,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white, // Changed for contrast
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(Icons.camera_alt,
+                                          color: Colors.indigo, size: 18), // Changed for contrast
                                     ),
-                                    child: const Icon(Icons.camera_alt,
-                                        color: Colors.white, size: 18),
                                   ),
                                 ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          alum.fullName,
-                          style: const TextStyle(
-                              fontSize: 22, fontWeight: FontWeight.bold),
-                        ),
-                        //const SizedBox(height: 4),
-                        Text(alum.profession,
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            alum.fullName,
                             style: const TextStyle(
-                                fontSize: 16, color: Colors.black54)),
-                        const SizedBox(height: 20),
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                // --- STYLE CHANGE ---
+                                color: Colors.white),
+                          ),
+                          //const SizedBox(height: 4),
+                          Text(alum.profession,
+                              style: const TextStyle(
+                                  fontSize: 16,
+                                  // --- STYLE CHANGE ---
+                                  color: Colors.white70)),
+                          const SizedBox(height: 20),
 
-                      ],
+                        ],
+                      ),
                     ),
                   ),
 
@@ -165,9 +180,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   pinned: true,
                   bottom: TabBar(
                     isScrollable: true,
-                    labelColor: Theme.of(context).primaryColor,
-                    unselectedLabelColor: Colors.black54,
-                    indicatorColor: Theme.of(context).primaryColor,
+                    // --- STYLE CHANGE ---
+                    // Updated TabBar colors to be visible on the new dark background
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white70,
+                    indicatorColor: Colors.white,
                     tabs: const [
                       Tab(text: "Contact"),
                       Tab(text: "About Me"),
@@ -225,9 +242,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         label: "Blood Group",
                         value: alum.bloodGroup,
                       ),
-                    // --- THESE ARE THE NEW CARDS ---
-
-
                   ],
                 ),
                 const Center(child: Text("About Me details here")),

@@ -1,3 +1,5 @@
+// lib/src/screens/home_screen.dart
+
 import 'package:alumbus/src/auth/auth_service.dart';
 import 'package:alumbus/src/models/user_model.dart';
 import 'package:alumbus/src/providers/auth_provider.dart';
@@ -26,94 +28,238 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  String _getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning';
+    }
+    if (hour < 17) {
+      return 'Good Afternoon';
+    }
+    return 'Good Evening';
+  }
+
+  Future<void> _logout(BuildContext context) async {
+    final bool? confirmLogout = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmLogout == true) {
+      await AuthService().signOut();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final userName = authProvider.currentUser?.displayName ?? 'User';
+    // --- NEW ---
+    // Get the user's profile photo URL from the auth provider.
+    final photoURL = authProvider.currentUser?.photoURL;
+
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text("Alumbus Home"),
+        backgroundColor: Colors.indigo,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.indigo.shade400, Colors.indigo.shade800],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+        ),
+        title: Row(
+          children: [
+            // --- WIDGET UPDATED ---
+            // This CircleAvatar now shows the user's photo or a default icon.
+            CircleAvatar(
+              backgroundColor: Colors.white,
+              backgroundImage: (photoURL != null && photoURL.isNotEmpty)
+                  ? NetworkImage(photoURL)
+                  : null,
+              child: (photoURL == null || photoURL.isEmpty)
+                  ? const Icon(Icons.person, color: Colors.indigo)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Hi $userName!",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  _getGreeting(),
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              Provider.of<AuthProvider>(context, listen: false).signOut();
-            },
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _logout(context),
             tooltip: 'Logout',
           ),
         ],
       ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        padding: const EdgeInsets.all(16.0),
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        children: [
-          HomeMenuCard(
-            title: "Find Alumni",
-            icon: Icons.search,
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const DirectoryScreen(),
-              ));
-            },
-          ),
-          HomeMenuCard(
-            title: "Events",
-            icon: Icons.event,
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => const EventScreen(),
-              ));
-            },
-          ),
-          HomeMenuCard(
-            title: "My Profile",
-            icon: Icons.person,
-            onTap: () async {
-              final currentUserId = AuthService().currentUser?.uid;
-              if (currentUserId == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Could not identify current user.")),
-                );
-                return;
-              }
-
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (context) => const Center(child: CircularProgressIndicator()),
-              );
-
-              try {
-                final Alum? currentUserProfile = await DirectoryService().getAlumById(currentUserId);
-
-                Navigator.of(context).pop(); // Hide loading indicator
-
-                if (currentUserProfile != null) {
-                  // THIS IS THE FIX: Changed 'alum' to 'initialAlum'
-                  Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => ProfileScreen(initialAlum: currentUserProfile),
-                  ));
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Your profile could not be found.")),
-                  );
-                }
-              } catch (e) {
-                Navigator.of(context).pop(); // Hide loading indicator
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("An error occurred. Please try again.")),
-                );
-              }
-            },
-          ),
-          HomeMenuCard(
-            title: "News & Updates",
-            icon: Icons.article,
-            onTap: () {
-              // TODO: Navigate to News Screen
-            },
-          ),
-        ],
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: ListView(
+          children: [
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
+                    )
+                  ]),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Welcome!",
+                          style: TextStyle(
+                            color: Colors.grey.shade800,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Let's connect with your community.",
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(
+                    Icons.groups,
+                    color: Colors.indigo.withOpacity(0.6),
+                    size: 60,
+                  )
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Explore Alumbus",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.indigo.shade900,
+              ),
+            ),
+            const SizedBox(height: 16),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              children: [
+                HomeMenuCard(
+                  title: "Find Alumni",
+                  subtitle: "Directory",
+                  icon: Icons.search,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const DirectoryScreen(),
+                    ));
+                  },
+                ),
+                HomeMenuCard(
+                  title: "Events",
+                  subtitle: "Upcoming",
+                  icon: Icons.event,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const EventScreen(),
+                    ));
+                  },
+                ),
+                HomeMenuCard(
+                  title: "My Profile",
+                  subtitle: "View & Edit",
+                  icon: Icons.person,
+                  onTap: () async {
+                    final currentUserId = AuthService().currentUser?.uid;
+                    if (currentUserId == null) return;
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) =>
+                      const Center(child: CircularProgressIndicator()),
+                    );
+                    try {
+                      final Alum? profile =
+                      await DirectoryService().getAlumById(currentUserId);
+                      Navigator.of(context).pop();
+                      if (profile != null) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) =>
+                              ProfileScreen(initialAlum: profile),
+                        ));
+                      }
+                    } catch (e) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+                HomeMenuCard(
+                  title: "News",
+                  subtitle: "Updates",
+                  icon: Icons.article,
+                  onTap: () {},
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

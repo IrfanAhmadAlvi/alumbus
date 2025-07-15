@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart'; // Import this to use the User type
 import 'package:flutter/material.dart';
 import 'package:alumbus/src/auth/auth_service.dart';
 
@@ -9,6 +10,10 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
 
+  // --- THIS IS THE FIX ---
+  // Add a getter to access the current user from the AuthService
+  User? get currentUser => _authService.currentUser;
+
   void _setLoading(bool value) {
     _isLoading = value;
     notifyListeners();
@@ -18,17 +23,15 @@ class AuthProvider with ChangeNotifier {
     _errorMessage = message;
   }
 
-  // THIS METHOD IS NOW UPDATED
   Future<bool> signUp({
     required String email,
     required String password,
-    required String fullName, // The required fullName parameter is now added
+    required String fullName,
   }) async {
     _setLoading(true);
     _setErrorMessage(null);
 
     try {
-      // The fullName is now correctly passed to the auth service
       await _authService.signUpWithEmail(
         email: email,
         password: password,
