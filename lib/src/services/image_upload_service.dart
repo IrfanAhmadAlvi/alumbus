@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:alumbus/src/services/directory_service.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // 1. IMPORT FIREBASE AUTH
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageUploadService {
@@ -10,49 +10,49 @@ class ImageUploadService {
 
   static const String _cloudName = "drmoabnvv";
   static const String _uploadPreset = "alumbus_uploads";
-  final CloudinaryPublic _cloudinary = CloudinaryPublic(_cloudName, _uploadPreset, cache: false);
+  final CloudinaryPublic _cloudinary =
+  CloudinaryPublic(_cloudName, _uploadPreset, cache: false);
 
   Future<File?> pickImage() async {
-    try {
-      final XFile? pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 80,
-      );
-      if (pickedFile != null) {
-        return File(pickedFile.path);
-      }
-      return null;
-    } catch (e) {
-      print("Error picking image: $e");
-      return null;
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    if (pickedFile != null) {
+      return File(pickedFile.path);
     }
+    return null;
   }
 
+  /// For Profile Pictures ONLY. It updates the user's profile.
   Future<String> uploadProfilePicture(File image, String userId) async {
     try {
-      CloudinaryFile file = await CloudinaryFile.fromFile(image.path,
-          resourceType: CloudinaryResourceType.Image);
-
-      CloudinaryResponse response = await _cloudinary.uploadFile(file);
+      CloudinaryResponse response = await _cloudinary
+          .uploadFile(CloudinaryFile.fromFile(image.path, folder: 'profile_pictures'));
 
       if (response.secureUrl.isNotEmpty) {
         final downloadUrl = response.secureUrl;
-
-        // Update the URL in the user's Firestore document
-        await _directoryService.updateAlumProfile(userId, {'profilePictureUrl': downloadUrl});
-
-        // 2. --- THIS IS THE FIX ---
-        // Also update the photoURL on the core Firebase Auth user record.
-        // This makes it available immediately throughout the app.
+        await _directoryService
+            .updateAlumProfile(userId, {'profilePictureUrl': downloadUrl});
         await FirebaseAuth.instance.currentUser?.updatePhotoURL(downloadUrl);
-
         return downloadUrl;
       } else {
         throw Exception('Cloudinary upload failed: No URL was returned.');
       }
-
     } catch (e) {
-      print("Error uploading profile picture to Cloudinary: $e");
+      rethrow;
+    }
+  }
+
+  /// For Event Banners ONLY. It just returns the URL.
+  Future<String> uploadEventBanner(File image) async {
+    try {
+      CloudinaryResponse response = await _cloudinary
+          .uploadFile(CloudinaryFile.fromFile(image.path, folder: 'event_banners'));
+
+      if (response.secureUrl.isNotEmpty) {
+        return response.secureUrl; // Just return the URL
+      } else {
+        throw Exception('Cloudinary upload failed: No URL was returned.');
+      }
+    } catch (e) {
       rethrow;
     }
   }

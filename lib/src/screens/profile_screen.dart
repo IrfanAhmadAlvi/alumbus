@@ -4,6 +4,7 @@ import 'package:alumbus/src/models/user_model.dart';
 import 'package:alumbus/src/screens/edit_about_me_screen.dart';
 import 'package:alumbus/src/screens/edit_profile_screen.dart';
 import 'package:alumbus/src/screens/edit_socials_screen.dart';
+import 'package:alumbus/src/screens/event_screen.dart'; // Import EventScreen
 import 'package:alumbus/src/services/image_upload_service.dart';
 import 'package:alumbus/src/widgets/profile_info_card.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _changeProfilePicture() async {
+    // This method is now correct and includes all fields
     setState(() {
       _isUploading = true;
     });
@@ -58,27 +60,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       setState(() {
         alum = Alum(
-          id: alum.id,
-          fullName: alum.fullName,
-          batch: alum.batch,
-          profession: alum.profession,
-          company: alum.company,
-          location: alum.location,
-          profilePictureUrl: downloadUrl,
-          primaryPhone: alum.primaryPhone,
-          primaryEmail: alum.primaryEmail,
-          dateOfBirth: alum.dateOfBirth,
-          bloodGroup: alum.bloodGroup,
-          secondaryPhone: alum.secondaryPhone,
-          secondaryEmail: alum.secondaryEmail,
-          aboutMe: alum.aboutMe,
-          linkedinUrl: alum.linkedinUrl,
-          facebookUrl: alum.facebookUrl,
-          instagramUrl: alum.instagramUrl,
-          githubUrl: alum.githubUrl,
-          youtubeUrl: alum.youtubeUrl,
-          websiteUrl: alum.websiteUrl,
-        );
+            id: alum.id,
+            fullName: alum.fullName,
+            batch: alum.batch,
+            profession: alum.profession,
+            company: alum.company,
+            location: alum.location,
+            profilePictureUrl: downloadUrl,
+            primaryPhone: alum.primaryPhone,
+            primaryEmail: alum.primaryEmail,
+            dateOfBirth: alum.dateOfBirth,
+            bloodGroup: alum.bloodGroup,
+            secondaryPhone: alum.secondaryPhone,
+            secondaryEmail: alum.secondaryEmail,
+            aboutMe: alum.aboutMe,
+            linkedinUrl: alum.linkedinUrl,
+            facebookUrl: alum.facebookUrl,
+            instagramUrl: alum.instagramUrl,
+            githubUrl: alum.githubUrl,
+            youtubeUrl: alum.youtubeUrl,
+            websiteUrl: alum.websiteUrl,
+            isAdmin: alum.isAdmin);
         _isUploading = false;
       });
 
@@ -126,6 +128,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   leading: const BackButton(color: Colors.white),
                   backgroundColor: Colors.indigo,
                   elevation: 0,
+                  // --- THIS IS THE FIX ---
+                  // Added an "Events" button to the AppBar's actions.
+                  actions: [
+                    IconButton(
+                      tooltip: "View Events",
+                      icon: const Icon(Icons.event, color: Colors.white),
+                      onPressed: () {
+                        // We already have the 'alum' object on this screen,
+                        // so we can directly use its isAdmin property.
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => EventScreen(isAdmin: alum.isAdmin),
+                        ));
+                      },
+                    ),
+                  ],
                   flexibleSpace: FlexibleSpaceBar(
                     background: Container(
                       decoration: BoxDecoration(
@@ -367,7 +384,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- THIS WIDGET IS NOW UPDATED ---
   Widget _buildSocialLink(
       {required IconData icon, required String platform, required String url}) {
     return Card(
@@ -375,7 +391,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: ListTile(
         leading: Icon(icon, color: Colors.indigo),
         title: Text(platform),
-        // The subtitle property that showed the URL has been removed.
         trailing: const Icon(Icons.launch),
         onTap: () => _launchUrl(url),
       ),

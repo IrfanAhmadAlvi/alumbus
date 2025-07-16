@@ -28,6 +28,8 @@ class Alum {
   final String youtubeUrl;
   final String websiteUrl;
 
+  final bool isAdmin;
+
 
   Alum({
     required this.id,
@@ -52,6 +54,7 @@ class Alum {
     required this.githubUrl,
     required this.youtubeUrl,
     required this.websiteUrl,
+    required this.isAdmin,
   });
 
   factory Alum.fromFirestore(DocumentSnapshot doc) {
@@ -81,6 +84,7 @@ class Alum {
       githubUrl: data['githubUrl'] ?? '',
       youtubeUrl: data['youtubeUrl'] ?? '',
       websiteUrl: data['websiteUrl'] ?? '',
+      isAdmin: data['isAdmin'] ?? false,
     );
   }
 }

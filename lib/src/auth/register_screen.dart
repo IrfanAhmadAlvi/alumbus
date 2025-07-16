@@ -268,10 +268,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 borderRadius: BorderRadius.circular(30),
                               ),
                             ),
-                            child: const Text("REGISTER",
+                            child: const Text("SIGN UP",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 16)),
+                                    fontSize: 16,color: Colors.white)),
+
                           ),
                         );
                       },

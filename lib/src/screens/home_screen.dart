@@ -1,5 +1,3 @@
-// lib/src/screens/home_screen.dart
-
 import 'package:alumbus/src/auth/auth_service.dart';
 import 'package:alumbus/src/models/user_model.dart';
 import 'package:alumbus/src/providers/auth_provider.dart';
@@ -36,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (hour < 17) {
       return 'Good Afternoon';
     }
-    return 'Good Night';
+    return 'Good Evening';
   }
 
   Future<void> _logout(BuildContext context) async {
@@ -61,7 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirmLogout == true) {
-      await AuthService().signOut();
+      // Use the provider to sign out to ensure state is managed correctly
+      await Provider.of<AuthProvider>(context, listen: false).signOut();
     }
   }
 
@@ -70,8 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final userName = authProvider.currentUser?.displayName ?? 'User';
-    // --- NEW ---
-    // Get the user's profile photo URL from the auth provider.
     final photoURL = authProvider.currentUser?.photoURL;
 
     return Scaffold(
@@ -91,8 +88,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         title: Row(
           children: [
-            // --- WIDGET UPDATED ---
-            // This CircleAvatar now shows the user's photo or a default icon.
             CircleAvatar(
               backgroundColor: Colors.white,
               backgroundImage: (photoURL != null && photoURL.isNotEmpty)
@@ -216,10 +211,41 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: "Events",
                   subtitle: "Upcoming",
                   icon: Icons.event,
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const EventScreen(),
-                    ));
+                  // --- THIS IS THE FIX ---
+                  // This onTap function now fetches the user's admin status first
+                  onTap: () async {
+                    // Show a loading dialog for a better user experience
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(child: CircularProgressIndicator()));
+
+                    try {
+                      final currentUserId = AuthService().currentUser?.uid;
+                      if (currentUserId == null) {
+                        Navigator.of(context).pop(); // Close loading dialog
+                        return;
+                      }
+
+                      final Alum? profile = await DirectoryService().getAlumById(currentUserId);
+                      final bool userIsAdmin = profile?.isAdmin ?? false;
+
+                      Navigator.of(context).pop(); // Close loading dialog
+
+                      // Now navigate to EventScreen with the correct admin status
+                      if(mounted) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => EventScreen(isAdmin: userIsAdmin),
+                        ));
+                      }
+                    } catch (e) {
+                      Navigator.of(context).pop(); // Close loading dialog on error
+                      if(mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Error fetching user data: $e"))
+                        );
+                      }
+                    }
                   },
                 ),
                 HomeMenuCard(
@@ -239,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       final Alum? profile =
                       await DirectoryService().getAlumById(currentUserId);
                       Navigator.of(context).pop();
-                      if (profile != null) {
+                      if (profile != null && mounted) {
                         Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) =>
                               ProfileScreen(initialAlum: profile),
@@ -254,10 +280,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: "News",
                   subtitle: "Updates",
                   icon: Icons.article,
-                  onTap: () {},
+                  onTap: () {
+                    // TODO: Implement News Screen navigation
+                  },
                 ),
               ],
             ),
+            const SizedBox(height: 24),
           ],
         ),
       ),
