@@ -30,6 +30,7 @@ dependencies:
   cloudinary_flutter: ^1.0.0
   cloudinary_url_gen: ^1.0.0
   flutter_image_compress: ^2.3.0
+  open_filex: ^4.4.0
 
 
 
