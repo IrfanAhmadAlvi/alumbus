@@ -2,8 +2,11 @@ import 'package:alumbus/src/auth/auth_service.dart';
 import 'package:alumbus/src/models/user_model.dart';
 import 'package:alumbus/src/providers/auth_provider.dart';
 import 'package:alumbus/src/providers/directory_provider.dart';
+import 'package:alumbus/src/screens/chat_screen.dart';
+import 'package:alumbus/src/screens/contact_us_screen.dart';
 import 'package:alumbus/src/screens/directory_screen.dart';
 import 'package:alumbus/src/screens/event_screen.dart';
+import 'package:alumbus/src/screens/notice_screen.dart';
 import 'package:alumbus/src/screens/profile_screen.dart';
 import 'package:alumbus/src/services/directory_service.dart';
 import 'package:alumbus/src/widgets/home_menu_card.dart';
@@ -21,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Fetch initial data when the screen loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<DirectoryProvider>(context, listen: false).fetchAlumni();
     });
@@ -34,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (hour < 17) {
       return 'Good Afternoon';
     }
-    return 'Good Night';
+    return 'Good Evening';
   }
 
   Future<void> _logout(BuildContext context) async {
@@ -59,8 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (confirmLogout == true) {
-      // Use the provider to sign out to ensure state is managed correctly
-      await Provider.of<AuthProvider>(context, listen: false).signOut();
+      if (mounted) {
+        await Provider.of<AuthProvider>(context, listen: false).signOut();
+      }
     }
   }
 
@@ -196,6 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: const NeverScrollableScrollPhysics(),
               mainAxisSpacing: 16,
               crossAxisSpacing: 16,
+              childAspectRatio: 1.1, // Adjust aspect ratio for 6 items
               children: [
                 HomeMenuCard(
                   title: "Find Alumni",
@@ -211,39 +217,37 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: "Events",
                   subtitle: "Upcoming",
                   icon: Icons.event,
-                  // --- THIS IS THE FIX ---
-                  // This onTap function now fetches the user's admin status first
                   onTap: () async {
-                    // Show a loading dialog for a better user experience
                     showDialog(
                         context: context,
                         barrierDismissible: false,
-                        builder: (context) => const Center(child: CircularProgressIndicator()));
+                        builder: (context) =>
+                        const Center(child: CircularProgressIndicator()));
 
                     try {
                       final currentUserId = AuthService().currentUser?.uid;
                       if (currentUserId == null) {
-                        Navigator.of(context).pop(); // Close loading dialog
+                        Navigator.of(context).pop();
                         return;
                       }
 
-                      final Alum? profile = await DirectoryService().getAlumById(currentUserId);
+                      final Alum? profile =
+                      await DirectoryService().getAlumById(currentUserId);
                       final bool userIsAdmin = profile?.isAdmin ?? false;
 
-                      Navigator.of(context).pop(); // Close loading dialog
+                      Navigator.of(context).pop();
 
-                      // Now navigate to EventScreen with the correct admin status
-                      if(mounted) {
+                      if (mounted) {
                         Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context) => EventScreen(isAdmin: userIsAdmin),
+                          builder: (context) =>
+                              EventScreen(isAdmin: userIsAdmin),
                         ));
                       }
                     } catch (e) {
-                      Navigator.of(context).pop(); // Close loading dialog on error
-                      if(mounted) {
+                      Navigator.of(context).pop();
+                      if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Error fetching user data: $e"))
-                        );
+                            SnackBar(content: Text("Error fetching user data: $e")));
                       }
                     }
                   },
@@ -277,11 +281,60 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 HomeMenuCard(
-                  title: "News",
-                  subtitle: "Updates",
+                  title: "Notice",
+                  subtitle: "View All",
                   icon: Icons.article,
+                  onTap: () async {
+                    showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (context) => const Center(child: CircularProgressIndicator()));
+
+                    try {
+                      final currentUserId = AuthService().currentUser?.uid;
+                      if (currentUserId == null) {
+                        Navigator.of(context).pop();
+                        return;
+                      }
+
+                      final Alum? profile = await DirectoryService().getAlumById(currentUserId);
+                      final bool userIsAdmin = profile?.isAdmin ?? false;
+
+                      Navigator.of(context).pop();
+
+                      if(mounted) {
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => NoticeScreen(isAdmin: userIsAdmin),
+                        ));
+                      }
+                    } catch (e) {
+                      Navigator.of(context).pop();
+                      if(mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Error fetching user data: $e"))
+                        );
+                      }
+                    }
+                  },
+                ),
+                HomeMenuCard(
+                  title: "Contact Us",
+                  subtitle: "Get in touch",
+                  icon: Icons.contact_support_outlined,
                   onTap: () {
-                    // TODO: Implement News Screen navigation
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const ContactUsScreen(),
+                    ));
+                  },
+                ),
+                HomeMenuCard(
+                  title: "Chat",
+                  subtitle: "Conversations",
+                  icon: Icons.chat_bubble_outline,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const ChatScreen(),
+                    ));
                   },
                 ),
               ],
