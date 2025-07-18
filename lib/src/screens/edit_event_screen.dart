@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:alumbus/src/screens/event_screen.dart';
-import 'package:alumbus/src/services/image_upload_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,8 +15,6 @@ class _EditEventScreenState extends State<EditEventScreen> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late TextEditingController _descriptionController;
-  File? _selectedImage;
-  String? _existingImageUrl;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   bool _isLoading = false;
@@ -30,12 +26,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
     _descriptionController =
         TextEditingController(text: widget.event.description);
     _selectedDate = widget.event.eventDate;
-    _existingImageUrl = widget.event.imageUrl;
-
     if (widget.event.startTime.isNotEmpty) {
-      // --- THIS IS THE FIX ---
-      // Use the exact same format "h:mm a" for parsing the time string
-      // that we used for saving it.
       final format = DateFormat("h:mm a");
       _selectedTime =
           TimeOfDay.fromDateTime(format.parse(widget.event.startTime));
@@ -47,16 +38,6 @@ class _EditEventScreenState extends State<EditEventScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImage() async {
-    final imageService = ImageUploadService();
-    final imageFile = await imageService.pickImage();
-    if (imageFile != null) {
-      setState(() {
-        _selectedImage = imageFile;
-      });
-    }
   }
 
   Future<void> _pickDate() async {
@@ -96,13 +77,6 @@ class _EditEventScreenState extends State<EditEventScreen> {
     });
 
     try {
-      String imageUrl = _existingImageUrl ?? '';
-
-      if (_selectedImage != null) {
-        final imageService = ImageUploadService();
-        imageUrl = await imageService.uploadEventBanner(_selectedImage!);
-      }
-
       final now = DateTime.now();
       final dt = DateTime(now.year, now.month, now.day, _selectedTime!.hour,
           _selectedTime!.minute);
@@ -116,7 +90,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
         'description': _descriptionController.text.trim(),
         'eventDate': Timestamp.fromDate(_selectedDate!),
         'startTime': formattedTime,
-        'imageUrl': imageUrl,
+        // 'imageUrl' field is no longer updated
       });
 
       if (mounted) {
@@ -151,44 +125,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade400),
-                    image: _selectedImage != null
-                        ? DecorationImage(
-                        image: FileImage(_selectedImage!),
-                        fit: BoxFit.cover)
-                        : (_existingImageUrl != null &&
-                        _existingImageUrl!.isNotEmpty)
-                        ? DecorationImage(
-                        image: NetworkImage(_existingImageUrl!),
-                        fit: BoxFit.cover)
-                        : null,
-                  ),
-                  child: (_selectedImage == null &&
-                      (_existingImageUrl == null ||
-                          _existingImageUrl!.isEmpty))
-                      ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.camera_alt_outlined,
-                            size: 50, color: Colors.grey),
-                        SizedBox(height: 8),
-                        Text("Tap to change banner image"),
-                      ],
-                    ),
-                  )
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(labelText: "Event Title"),

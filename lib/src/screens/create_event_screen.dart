@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'package:alumbus/src/services/image_upload_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +13,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
-  File? _selectedImage;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   bool _isLoading = false;
@@ -25,16 +22,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickImage() async {
-    final imageService = ImageUploadService();
-    final imageFile = await imageService.pickImage();
-    if (imageFile != null) {
-      setState(() {
-        _selectedImage = imageFile;
-      });
-    }
   }
 
   Future<void> _pickDate() async {
@@ -62,11 +49,9 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
   Future<void> _saveEvent() async {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedDate == null ||
-        _selectedTime == null ||
-        _selectedImage == null) {
+    if (_selectedDate == null || _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Please select an image, date, and time."),
+          content: Text("Please select a date and time."),
           backgroundColor: Colors.redAccent));
       return;
     }
@@ -76,20 +61,17 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     });
 
     try {
-      final imageService = ImageUploadService();
-      final imageUrl = await imageService.uploadEventBanner(_selectedImage!);
-
-      // Correctly format the TimeOfDay into a 12-hour string with AM/PM
       final now = DateTime.now();
-      final dt = DateTime(now.year, now.month, now.day, _selectedTime!.hour, _selectedTime!.minute);
+      final dt = DateTime(now.year, now.month, now.day, _selectedTime!.hour,
+          _selectedTime!.minute);
       final formattedTime = DateFormat("h:mm a").format(dt);
 
       await FirebaseFirestore.instance.collection('events').add({
         'title': _titleController.text.trim(),
         'description': _descriptionController.text.trim(),
         'eventDate': Timestamp.fromDate(_selectedDate!),
-        'startTime': formattedTime, // Save the correctly formatted time
-        'imageUrl': imageUrl,
+        'startTime': formattedTime,
+        // 'imageUrl' field is no longer saved
         'createdAt': Timestamp.now(),
       });
 
@@ -125,37 +107,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade200,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade400),
-                    image: _selectedImage != null
-                        ? DecorationImage(
-                        image: FileImage(_selectedImage!),
-                        fit: BoxFit.cover)
-                        : null,
-                  ),
-                  child: _selectedImage == null
-                      ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.camera_alt_outlined,
-                            size: 50, color: Colors.grey),
-                        SizedBox(height: 8),
-                        Text("Tap to upload a banner image"),
-                      ],
-                    ),
-                  )
-                      : null,
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               TextFormField(
                   controller: _titleController,
                   decoration: const InputDecoration(labelText: "Event Title"),
